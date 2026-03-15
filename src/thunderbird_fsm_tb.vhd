@@ -58,27 +58,92 @@ architecture test_bench of thunderbird_fsm_tb is
 	
 	component thunderbird_fsm is 
 --	  port(
-		
---	  );
+
+    port(
+        i_clk   : in  std_logic;
+        i_reset : in  std_logic;
+        i_left  : in  std_logic;
+        i_right : in  std_logic;
+        o_lights_L : out std_logic_vector(2 downto 0);
+        o_lights_R : out std_logic_vector(2 downto 0)
+	  );
 	end component thunderbird_fsm;
 
 	-- test I/O signals
-	
+	signal i_clk   : std_logic := '0';
+    signal i_reset : std_logic := '0';
+    signal i_left  : std_logic := '0';
+    signal i_right : std_logic := '0';
+    
+    signal o_lights_L : std_logic_vector(2 downto 0);
+    signal o_lights_R : std_logic_vector(2 downto 0);
+
 	-- constants
-	
+	constant clk_period : time := 10 ns;
+
 	
 begin
 	-- PORT MAPS ----------------------------------------
-	
+	uut : thunderbird_fsm
+    port map(
+        i_clk => i_clk,
+        i_reset => i_reset,
+        i_left => i_left,
+        i_right => i_right,
+        o_lights_L => o_lights_L,
+        o_lights_R => o_lights_R
+    );
 	-----------------------------------------------------
 	
 	-- PROCESSES ----------------------------------------	
     -- Clock process ------------------------------------
-    
+    clk_process : process
+begin
+    while true loop
+        i_clk <= '0';
+        wait for clk_period/2;
+        i_clk <= '1';
+        wait for clk_period/2;
+    end loop;
+    end process;
+stimulus_process : process
+begin
 	-----------------------------------------------------
 	
 	-- Test Plan Process --------------------------------
 	
 	-----------------------------------------------------	
 	
+    -- Reset FSM
+    i_reset <= '1';
+    wait for 50 ns;
+    i_reset <= '0';
+    wait for 50 ns;
+
+    -- LEFT TURN TEST
+    i_left <= '1';
+    wait for 50 ns;
+    i_left <= '0';
+    wait for 50 ns;
+
+    -- RIGHT TURN TEST
+    i_right <= '1';
+    wait for 50 ns;
+    i_right <= '0';
+    wait for 50 ns;
+
+    -- HAZARD LIGHT TEST
+    i_left <= '1';
+    i_right <= '1';
+    wait for 50 ns;
+
+    i_left <= '0';
+    i_right <= '0';
+    wait for 50 ns;
+
+    -- END SIMULATION
+    wait;
+
+end process;
+
 end test_bench;
